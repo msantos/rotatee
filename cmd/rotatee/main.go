@@ -192,9 +192,5 @@ func (state *State) run() error {
 		}
 	}
 
-	if scanner.Err() != nil {
-		return fmt.Errorf("%s: %w", path, scanner.Err())
-	}
-
-	return nil
+	return scanner.Err()
 }
