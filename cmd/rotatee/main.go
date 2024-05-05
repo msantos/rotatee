@@ -147,9 +147,9 @@ func (state *State) run() error {
 
 	rotate := false
 
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		s := scanner.Text()
+	stdin := bufio.NewScanner(os.Stdin)
+	for stdin.Scan() {
+		s := stdin.Text()
 		fmt.Println(s)
 
 		// Include newline in count.
@@ -192,5 +192,5 @@ func (state *State) run() error {
 		}
 	}
 
-	return scanner.Err()
+	return stdin.Err()
 }
