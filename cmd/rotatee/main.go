@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -18,6 +19,8 @@ const (
 	version = "0.1.0"
 )
 
+var stdoutIsPipe bool
+
 type State struct {
 	prefix  string
 	dir     string
@@ -25,6 +28,7 @@ type State struct {
 	maxsize int
 	cur     int
 	ignore  bool
+	errMode func(error) error
 
 	sigch chan os.Signal
 }
@@ -54,6 +58,7 @@ func main() {
 	maxsize := flag.Int("maxsize", 100, "max file size (MiB)")
 	format := flag.String("format", time.RFC3339+".log", "timestamp")
 	ignore := flag.Bool("ignore", false, "ignore SIGTERM")
+	outputError := flag.String("output-error", "sigpipe", "set behavior on write error")
 
 	flag.Usage = func() { usage() }
 	flag.Parse()
@@ -64,6 +69,8 @@ func main() {
 		prefix = flag.Arg(0)
 	}
 
+	stdoutIsPipe = isPipe()
+
 	state := &State{
 		prefix:  prefix,
 		format:  *format,
@@ -71,9 +78,10 @@ func main() {
 		maxsize: *maxsize * 1024 * 1024,
 		ignore:  *ignore,
 		sigch:   make(chan os.Signal, 1),
+		errMode: mode(*outputError),
 	}
 
-	if err := os.MkdirAll(*dir, 0700); err != nil {
+	if err := os.MkdirAll(*dir, 0700); state.errMode(err) != nil {
 		log.Fatalln(err)
 	}
 
@@ -96,8 +104,8 @@ func (state *State) initialize() error {
 	}
 
 	for _, v := range matches {
-		if err := state.rename(v); err != nil {
-			log.Println(v, err)
+		if err := state.rename(v); state.errMode(err) != nil {
+			return err
 		}
 	}
 
@@ -106,11 +114,12 @@ func (state *State) initialize() error {
 
 func (state *State) signal() {
 	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGHUP, syscall.SIGTERM)
+	signal.Notify(ch, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGPIPE)
 
 	for {
 		sig := <-ch
 		switch sig {
+		case syscall.SIGPIPE:
 		case syscall.SIGHUP:
 		case syscall.SIGTERM:
 			if state.ignore {
@@ -137,7 +146,7 @@ func (state *State) rename(oldpath string) error {
 func (state *State) run() error {
 	path := state.path(time.Now())
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
+	if state.errMode(err) != nil {
 		return fmt.Errorf("%s: %w", path, err)
 	}
 
@@ -150,7 +159,9 @@ func (state *State) run() error {
 	stdin := bufio.NewScanner(os.Stdin)
 	for stdin.Scan() {
 		s := stdin.Text()
-		fmt.Println(s)
+		if _, err := fmt.Println(s); state.errMode(err) != nil {
+			return err
+		}
 
 		// Include newline in count.
 		if len(s)+1+state.cur > state.maxsize {
@@ -161,24 +172,26 @@ func (state *State) run() error {
 			rotate = false
 			state.cur = 0
 
-			if err := f.Close(); err != nil {
+			if err := f.Close(); state.errMode(err) != nil {
 				return fmt.Errorf("%s: %w", path, err)
 			}
 
-			if err := state.rename(path); err != nil {
+			if err := state.rename(path); state.errMode(err) != nil {
 				return fmt.Errorf("%s: %w", path, err)
 			}
 
 			path = state.path(time.Now())
 			f, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
-			if err != nil {
+			if state.errMode(err) != nil {
 				return fmt.Errorf("%s: %w", path, err)
 			}
 		}
 
 		state.cur += len(s) + 1 // newline
 
-		fmt.Fprintln(f, s)
+		if _, err := fmt.Fprintln(f, s); state.errMode(err) != nil {
+			return err
+		}
 
 		select {
 		case sig := <-state.sigch:
@@ -193,4 +206,68 @@ func (state *State) run() error {
 	}
 
 	return stdin.Err()
+}
+
+func isPipe() bool {
+	fi, _ := os.Stdout.Stat()
+	return fi.Mode()&os.ModeNamedPipe != 0
+}
+
+func mode(s string) func(error) error {
+	switch s {
+	case "sigpipe":
+		return modeSigPipe
+	case "warn":
+		return modeWarn
+	case "warn-nopipe":
+		return modeWarnNoPipe
+	case "exit":
+		return modeExit
+	case "exit-nopipe":
+		return modeExitNoPipe
+	default:
+		return modeIgnore
+	}
+}
+
+func modeIgnore(err error) error {
+	return nil
+}
+
+func modeWarn(err error) error {
+	if err == nil || errors.Is(err, os.ErrInvalid) {
+		return nil
+	}
+	log.Println(err)
+	return nil
+}
+
+func modeWarnNoPipe(err error) error {
+	if err == nil || errors.Is(err, os.ErrInvalid) || errors.Is(err, syscall.EPIPE) {
+		return nil
+	}
+	log.Println(err)
+	return nil
+}
+
+func modeExit(err error) error {
+	return err
+}
+
+func modeExitNoPipe(err error) error {
+	if err == nil || errors.Is(err, os.ErrInvalid) || errors.Is(err, syscall.EPIPE) {
+		return nil
+	}
+	return err
+}
+
+func modeSigPipe(err error) error {
+	if err == nil || errors.Is(err, os.ErrInvalid) {
+		return nil
+	}
+	if errors.Is(err, syscall.EPIPE) {
+		return err
+	}
+	log.Println(err)
+	return nil
 }
