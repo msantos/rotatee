@@ -120,6 +120,7 @@ func (state *State) signal() {
 		sig := <-ch
 		switch sig {
 		case syscall.SIGPIPE:
+			continue
 		case syscall.SIGHUP:
 		case syscall.SIGTERM:
 			if state.ignore {
