@@ -58,7 +58,7 @@ func main() {
 	maxsize := flag.Int("maxsize", 100, "max file size (MiB)")
 	format := flag.String("format", time.RFC3339+".log", "timestamp")
 	ignore := flag.Bool("ignore", false, "ignore SIGTERM")
-	outputError := flag.String("output-error", "sigpipe", "set behavior on write error")
+	outputError := flag.String("output-error", "", "set behavior on write error")
 
 	flag.Usage = func() { usage() }
 	flag.Parse()
@@ -216,8 +216,8 @@ func isPipe() bool {
 
 func mode(s string) func(error) error {
 	switch s {
-	case "sigpipe":
-		return modeSigPipe
+	case "ignore":
+		return modeIgnore
 	case "warn":
 		return modeWarn
 	case "warn-nopipe":
@@ -227,7 +227,7 @@ func mode(s string) func(error) error {
 	case "exit-nopipe":
 		return modeExitNoPipe
 	default:
-		return modeIgnore
+		return modeSigPipe
 	}
 }
 
