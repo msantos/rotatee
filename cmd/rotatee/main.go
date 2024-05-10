@@ -19,8 +19,6 @@ const (
 	version = "0.1.0"
 )
 
-var stdoutIsPipe bool
-
 type State struct {
 	prefix  string
 	dir     string
@@ -68,8 +66,6 @@ func main() {
 	if flag.NArg() > 0 {
 		prefix = flag.Arg(0)
 	}
-
-	stdoutIsPipe = isPipe()
 
 	state := &State{
 		prefix:  prefix,
@@ -207,11 +203,6 @@ func (state *State) run() error {
 	}
 
 	return stdin.Err()
-}
-
-func isPipe() bool {
-	fi, _ := os.Stdout.Stat()
-	return fi.Mode()&os.ModeNamedPipe != 0
 }
 
 func mode(s string) func(error) error {
