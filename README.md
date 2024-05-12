@@ -56,3 +56,13 @@ ignore
 
 maxsize *int*
 : max file size (MiB) (default 100)
+
+output-error *string*
+: set behavior on write error (warn, warn-nopipe, exit, exit-nopipe) (default "sigpipe")
+
+* warn: diagnose errors writing to any output
+* warn-nopipe: diagnose errors writing to any output not a pipe
+* exit: exit on error writing to any output
+* exit-nopipe: exit on error writing to any output not a pipe
+* sigpipe: exit on any error writing to a pipe, diagnose errors writing
+  to any output not a pipe
