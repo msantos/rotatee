@@ -67,6 +67,13 @@ func main() {
 		prefix = flag.Arg(0)
 	}
 
+	errMode := mode(*outputError)
+	if errMode == nil {
+		fmt.Println("invalid output error:", *outputError)
+		flag.Usage()
+		os.Exit(2)
+	}
+
 	state := &State{
 		prefix:  prefix,
 		format:  *format,
@@ -74,7 +81,7 @@ func main() {
 		maxsize: *maxsize * 1024 * 1024,
 		ignore:  *ignore,
 		sigch:   make(chan os.Signal, 1),
-		errMode: mode(*outputError),
+		errMode: errMode,
 	}
 
 	if err := os.MkdirAll(*dir, 0700); state.errMode(err) != nil {
@@ -207,6 +214,8 @@ func (state *State) run() error {
 
 func mode(s string) func(error) error {
 	switch s {
+	case "", "sigpipe":
+		return modeSigPipe
 	case "ignore":
 		return modeIgnore
 	case "warn":
@@ -218,7 +227,7 @@ func mode(s string) func(error) error {
 	case "exit-nopipe":
 		return modeExitNoPipe
 	default:
-		return modeSigPipe
+		return nil
 	}
 }
 
