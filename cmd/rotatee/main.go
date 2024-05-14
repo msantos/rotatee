@@ -56,7 +56,7 @@ func main() {
 	maxsize := flag.Int("maxsize", 100, "max file size (MiB)")
 	format := flag.String("format", time.RFC3339+".log", "timestamp")
 	ignore := flag.Bool("ignore", false, "ignore SIGTERM")
-	outputError := flag.String("output-error", "sigpipe", "set behavior on write error (warn, warn-nopipe, exit, exit-nopipe)")
+	outputError := flag.String("output-error", "sigpipe", "set behavior on write error (sigpipe, warn, warn-nopipe, exit, exit-nopipe)")
 
 	flag.Usage = func() { usage() }
 	flag.Parse()
