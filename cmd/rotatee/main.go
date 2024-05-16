@@ -69,7 +69,7 @@ func main() {
 
 	errMode := mode(*outputError)
 	if errMode == nil {
-		fmt.Println("invalid output error:", *outputError)
+		fmt.Println("invalid argument for output error:", *outputError)
 		flag.Usage()
 		os.Exit(2)
 	}
