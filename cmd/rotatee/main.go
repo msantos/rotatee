@@ -122,15 +122,12 @@ func (state *State) signal() {
 	for {
 		sig := <-ch
 		switch sig {
-		case syscall.SIGPIPE:
-			continue
 		case syscall.SIGHUP:
 		case syscall.SIGTERM:
 			if state.ignore {
 				continue
 			}
 		default:
-			log.Printf("unhandled signal received: %s\n", sig)
 			continue
 		}
 		state.sigch <- sig
