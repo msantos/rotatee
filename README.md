@@ -66,3 +66,4 @@ output-error *string*
 * exit-nopipe: exit on error writing to any output not a pipe
 * sigpipe: exit on any error writing to a pipe, diagnose errors writing
   to any output not a pipe
+* ignore: suppress and do not exit on errors
