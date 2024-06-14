@@ -22,7 +22,7 @@ go install codeberg.org/msantos/rotatee/cmd/rotatee@latest
 
 ```
 cd cmd/rotatee
-CGO_ENABLED=0 go build -trimpath -ldflags "-s -w"
+CGO_ENABLED=0 go build -trimpath
 ```
 
 # EXAMPLES
