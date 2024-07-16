@@ -20,9 +20,11 @@ go install codeberg.org/msantos/rotatee/cmd/rotatee@latest
 
 ## Source
 
+To build a reproducible executable from the git repository:
+
 ```
 cd cmd/rotatee
-CGO_ENABLED=0 go build -trimpath
+CGO_ENABLED=0 go build -C cmd/rotatee -trimpath -ldflags "-w"
 ```
 
 # EXAMPLES
