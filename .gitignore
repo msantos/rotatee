@@ -15,5 +15,6 @@
 # vendor/
 
 cmd/rotatee/rotatee
+/rotatee
 
 *.log
