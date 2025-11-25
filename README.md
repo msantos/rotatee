@@ -15,7 +15,7 @@ rotatee [*options*] [*file prefix*]
 # BUILDING
 
 ```
-go install codeberg.org/msantos/rotatee/cmd/rotatee@latest
+go install go.iscode.ca/rotatee/cmd/rotatee@latest
 ```
 
 ## Source
