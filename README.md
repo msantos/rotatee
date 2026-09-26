@@ -14,7 +14,7 @@ rotatee [*options*] [*file prefix*]
 
 # BUILDING
 
-```
+```bash
 go install go.iscode.ca/rotatee/cmd/rotatee@latest
 ```
 
@@ -22,13 +22,13 @@ go install go.iscode.ca/rotatee/cmd/rotatee@latest
 
 To build a reproducible executable from the git repository:
 
-```
+```bash
 CGO_ENABLED=0 go build -trimpath -ldflags "-w" ./cmd/rotatee
 ```
 
 # EXAMPLES
 
-```
+```bash
 # writes output to files in  the current directory prefixed with "stdout"
 rotatee
 
