@@ -148,7 +148,7 @@ func (state *State) run() error {
 	path := state.path(time.Now())
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if state.errMode(err) != nil {
-		return fmt.Errorf("%s: %w", path, err)
+		return fmt.Errorf("%w", err)
 	}
 
 	defer func() {
@@ -181,10 +181,9 @@ func (state *State) run() error {
 				return fmt.Errorf("%s: %w", path, err)
 			}
 
-			path = state.path(time.Now())
-			f, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+			f, err = os.OpenFile(state.path(time.Now()), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 			if state.errMode(err) != nil {
-				return fmt.Errorf("%s: %w", path, err)
+				return fmt.Errorf("%w", err)
 			}
 		}
 
