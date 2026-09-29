@@ -103,7 +103,7 @@ func (state *State) initialize() error {
 	glob := filepath.Join(state.dir, "*.rotatee")
 	matches, err := filepath.Glob(glob)
 	if err != nil {
-		return fmt.Errorf("%s:%w", glob, err)
+		return fmt.Errorf(":%w", err)
 	}
 
 	for _, v := range matches {
