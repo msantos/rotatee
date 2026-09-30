@@ -103,7 +103,7 @@ func (state *State) initialize() error {
 	glob := filepath.Join(state.dir, "*.rotatee")
 	matches, err := filepath.Glob(glob)
 	if err != nil {
-		return fmt.Errorf(":%w", err)
+		return fmt.Errorf("%w", err)
 	}
 
 	for _, v := range matches {
@@ -174,11 +174,11 @@ func (state *State) run() error {
 			state.cur = 0
 
 			if err := f.Close(); state.errMode(err) != nil {
-				return fmt.Errorf("%s: %w", path, err)
+				return fmt.Errorf("%w", path, err)
 			}
 
 			if err := state.rename(path); state.errMode(err) != nil {
-				return fmt.Errorf("%s: %w", path, err)
+				return fmt.Errorf("%w", path, err)
 			}
 
 			f, err = os.OpenFile(state.path(time.Now()), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
