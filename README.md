@@ -4,7 +4,7 @@ rotatee [*options*] [*file prefix*]
 
 # DESCRIPTION
 
-`rotatee` is `tee(1)` with file rotation:
+`rotatee` is [`tee(1)`](https://man7.org/linux/man-pages/man1/tee.1.html) with file rotation:
 * stdin is written to stdout
 * stdin is also written to a file with a timestamp
 * if the next line of input exceeds the maximum configured number of
