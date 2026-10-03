@@ -61,10 +61,22 @@ maxsize *int*
 output-error *string*
 : set behavior on write error (sigpipe, warn, warn-nopipe, exit, exit-nopipe) (default "sigpipe")
 
-* warn: diagnose errors writing to any output
-* warn-nopipe: diagnose errors writing to any output not a pipe
-* exit: exit on error writing to any output
-* exit-nopipe: exit on error writing to any output not a pipe
-* sigpipe: exit on any error writing to a pipe, diagnose errors writing
-  to any output not a pipe
-* ignore: suppress and do not exit on errors
+## Output Error Behaviors
+
+warn
+: diagnose errors writing to any output
+
+warn-nopipe
+: diagnose errors writing to any output not a pipe
+
+exit
+: exit on error writing to any output
+
+exit-nopipe
+: exit on error writing to any output not a pipe
+
+sigpipe
+: exit on any error writing to a pipe, diagnose errors writing to any output not a pipe
+
+ignore
+: suppress and do not exit on errors
